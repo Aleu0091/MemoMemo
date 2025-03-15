@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "메모메모",
+    "version": "1.0",
+    "description": "드래그한 요소를 기록",
+    "permissions": ["contextMenus", "storage", "clipboardWrite"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "host_permissions": ["<all_urls>"],
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
