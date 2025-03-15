@@ -23,33 +23,54 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadNotes() {
         chrome.storage.local.get({ notes: [] }, (data) => {
             noteList.innerHTML = "";
-            data.notes.forEach((note, index) => {
-                const li = document.createElement("li");
-                li.textContent = note;
 
-                li.onclick = () => {
-                    navigator.clipboard
-                        .writeText(note)
-                        .then(() => {
-                            showCopyMessage();
-                        })
-                        .catch((err) => {
-                            console.error("Failed to copy text:", err);
-                        });
-                };
+            if (data.notes.length === 0) {
+                const noNotesMessage = document.createElement("p");
+                noNotesMessage.textContent = "No notes available.";
+                noteList.appendChild(noNotesMessage);
+            } else {
+                data.notes.forEach((note, index) => {
+                    const li = document.createElement("li");
+                    li.textContent = note;
+                    li.classList.add("note-item");
 
-                const deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "X";
-                deleteBtn.onclick = () => {
-                    data.notes.splice(index, 1);
-                    chrome.storage.local.set({ notes: data.notes }, loadNotes);
-                };
+                    li.onclick = () => {
+                        navigator.clipboard
+                            .writeText(note)
+                            .then(() => {
+                                showCopyMessage();
+                            })
+                            .catch((err) => {
+                                console.error("Failed to copy text:", err);
+                            });
+                    };
 
-                li.appendChild(deleteBtn);
-                noteList.appendChild(li);
-            });
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.textContent = "X";
+                    deleteBtn.classList.add("delete-btn");
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        data.notes.splice(index, 1);
+                        chrome.storage.local.set(
+                            { notes: data.notes },
+                            loadNotes
+                        );
+                    };
+
+                    li.appendChild(deleteBtn);
+                    noteList.appendChild(li);
+                });
+            }
         });
     }
+
+    const overallDeleteBtn = document.createElement("button");
+    overallDeleteBtn.textContent = "전체 삭제";
+    overallDeleteBtn.classList.add("overall-delete-btn");
+    overallDeleteBtn.onclick = () => {
+        chrome.storage.local.set({ notes: [] }, loadNotes);
+    };
+    document.body.insertBefore(overallDeleteBtn, noteList);
 
     loadNotes();
 });
