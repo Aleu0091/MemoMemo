@@ -1,8 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const noteList = document.getElementById("noteList");
-    const copyMessage = document.createElement("div");
+    const overallDeleteBtn = document.createElement("button");
+    overallDeleteBtn.textContent = "전체 삭제";
+    overallDeleteBtn.classList.add("overall-delete-btn");
+    overallDeleteBtn.style.display = "none";
+    overallDeleteBtn.onclick = () => {
+        chrome.storage.local.set({ notes: [] }, loadNotes);
+    };
+    document.body.insertBefore(overallDeleteBtn, noteList);
 
-    copyMessage.textContent = "복사됨";
+    const copyMessage = document.createElement("div");
     copyMessage.style.position = "fixed";
     copyMessage.style.bottom = "20px";
     copyMessage.style.left = "50%";
@@ -12,13 +19,23 @@ document.addEventListener("DOMContentLoaded", () => {
     copyMessage.style.padding = "10px 20px";
     copyMessage.style.borderRadius = "5px";
     copyMessage.style.display = "none";
+    copyMessage.style.transition = "opacity 0.3s ease";
+    copyMessage.style.opacity = "0";
 
     document.body.appendChild(copyMessage);
 
-    function showCopyMessage() {
+    function showMessage(msg) {
+        copyMessage.textContent = msg;
         copyMessage.style.display = "block";
+        requestAnimationFrame(() => {
+            copyMessage.style.opacity = "1";
+        });
+
         setTimeout(() => {
-            copyMessage.style.display = "none";
+            copyMessage.style.opacity = "0";
+            setTimeout(() => {
+                copyMessage.style.display = "none";
+            }, 300);
         }, 2000);
     }
 
@@ -31,7 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 noNotesMessage.style.textAlign = "center";
                 noNotesMessage.textContent = "저장된 메모가 없습니다.";
                 noteList.appendChild(noNotesMessage);
+                overallDeleteBtn.style.display = "none";
             } else {
+                overallDeleteBtn.style.display = "block";
                 data.notes.forEach((note, index) => {
                     const li = document.createElement("li");
                     li.textContent = note;
@@ -41,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         navigator.clipboard
                             .writeText(note)
                             .then(() => {
-                                showCopyMessage();
+                                showMessage("복사됨");
                             })
                             .catch((err) => {
                                 console.error("Failed to copy text:", err);
@@ -49,7 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
 
                     const deleteBtn = document.createElement("button");
-                    deleteBtn.textContent = "X";
+                    deleteBtn.style.zIndex = "9999";
+                    deleteBtn.textContent = "×";
                     deleteBtn.classList.add("delete-btn");
                     deleteBtn.onclick = (e) => {
                         e.stopPropagation();
@@ -66,14 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    const overallDeleteBtn = document.createElement("button");
-    overallDeleteBtn.textContent = "전체 삭제";
-    overallDeleteBtn.classList.add("overall-delete-btn");
-    overallDeleteBtn.onclick = () => {
-        chrome.storage.local.set({ notes: [] }, loadNotes);
-    };
-    document.body.insertBefore(overallDeleteBtn, noteList);
 
     loadNotes();
 });
