@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const noteList = document.getElementById("noteList");
     const copyMessage = document.createElement("div");
+
     copyMessage.textContent = "복사됨";
     copyMessage.style.position = "fixed";
     copyMessage.style.bottom = "20px";
@@ -11,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     copyMessage.style.padding = "10px 20px";
     copyMessage.style.borderRadius = "5px";
     copyMessage.style.display = "none";
+
     document.body.appendChild(copyMessage);
 
     function showCopyMessage() {
@@ -26,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.notes.length === 0) {
                 const noNotesMessage = document.createElement("p");
-                noNotesMessage.textContent = "No notes available.";
+                noNotesMessage.style.textAlign = "center";
+                noNotesMessage.textContent = "저장된 메모가 없습니다.";
                 noteList.appendChild(noNotesMessage);
             } else {
                 data.notes.forEach((note, index) => {
